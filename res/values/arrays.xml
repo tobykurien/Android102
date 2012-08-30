@@ -1,0 +1,9 @@
+<resources>
+
+    <string-array name="tabs">
+        <item>Family</item>
+        <item>Friends</item>
+        <item>Colleagues</item>
+    </string-array>
+
+</resources>

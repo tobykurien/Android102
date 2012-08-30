@@ -1,0 +1,12 @@
+<resources>
+
+    <string name="app_name">MaFamille</string>
+    <string name="title_person_detail">Détail de la personne</string>
+    <string name="title_person_list">MaFamille</string>
+
+    <string name="menu_add">ajouter</string>
+    <string name="menu_locate">Trouver</string>
+    <string name="menu_help_me">Aidez-moi</string>
+    <string name="menu_search">Rechercher</string>
+    
+</resources>

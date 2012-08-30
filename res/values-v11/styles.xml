@@ -1,0 +1,14 @@
+<resources>
+
+    <style name="AppTheme" parent="android:Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+    </style>
+
+    <!-- style for the action bar backgrounds -->
+    <style name="MyActionBar" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:background">#ffa0a0a0</item>
+        <item name="android:backgroundStacked">#ff101010</item>
+        <item name="android:backgroundSplit">#ff101010</item>
+    </style>
+
+</resources>

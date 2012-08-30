@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_name">MyFamily</string>
+    <string name="title_person_detail">Person Detail</string>
+    <string name="title_person_list">MyFamily</string>
+
+    <string name="menu_add">Add</string>
+    <string name="menu_locate">Locate</string>
+    <string name="menu_help_me">Get Help</string>
+    <string name="menu_search">Search</string>
+    
+    <string name="btn_call">Call</string>
+    <string name="btn_locate">Locate</string>
+</resources>
