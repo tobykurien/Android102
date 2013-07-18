@@ -11,12 +11,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.myfamily.db.FamilyDb;
-import com.myfamily.db.model.FamilyMember;
+import com.myfamily.db.FamilyMember;
 import com.myfamily.dummy.DummyContent;
 
 public class PersonListFragment extends ListFragment {

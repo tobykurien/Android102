@@ -1,12 +1,12 @@
 package com.myfamily;
 
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Contacts.People;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.support.v4.app.Fragment;
 import android.telephony.SmsManager;
@@ -19,7 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.myfamily.db.FamilyDb;
-import com.myfamily.db.model.FamilyMember;
+import com.myfamily.db.FamilyMember;
 
 public class PersonDetailFragment extends Fragment {
    public static final String ARG_ITEM_ID = "item_id";

@@ -1,65 +1,34 @@
 package com.myfamily.db;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import android.content.ContentValues;
+import com.myfamily.R;
+
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
+import asia.sonix.android.orm.AbatisService;
 
-import com.myfamily.db.helper.FamilyDbHelper;
-import com.myfamily.db.model.FamilyMember;
+public class FamilyDb extends AbatisService {
+	public FamilyDb(Context context) {
+		super(context, "family");
+	}
 
-public class FamilyDb {
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		// do upgrades here
+	}
 
-   // Database fields
-   private SQLiteDatabase database;
-   private FamilyDbHelper dbHelper;
-   private String[] allColumns = { 
-            FamilyDbHelper.COLUMN_ID, 
-            FamilyDbHelper.COLUMN_CONTACT_ID, 
-            FamilyDbHelper.COLUMN_NAME 
-   };
+	public List<FamilyMember> getFamilyMembers() {
+		return executeForBeanList(R.string.getMembers, null, FamilyMember.class);
+	}
 
-   public FamilyDb(Context context) {
-      dbHelper = new FamilyDbHelper(context);
-      database = dbHelper.getWritableDatabase();               
-   }
-   
-   public long addFamilyMember(String name, long contactId) {
-      ContentValues cv = new ContentValues();
-      cv.put(FamilyDbHelper.COLUMN_CONTACT_ID, contactId);
-      cv.put(FamilyDbHelper.COLUMN_NAME, name);
-      long ret = database.insert(FamilyDbHelper.TABLE_FAMILY, "", cv);
-      database.close();
-      return ret;
-   }
-   
-   public List<FamilyMember> getFamilyMembers() {
-      List<FamilyMember> familyMembers = new ArrayList<FamilyMember>();
-
-      Cursor cursor = database.query(FamilyDbHelper.TABLE_FAMILY,
-          allColumns, null, null, null, null, null);
-
-      cursor.moveToFirst();
-      while (!cursor.isAfterLast()) {
-        FamilyMember family = familyMember(cursor);
-        familyMembers.add(family);
-        cursor.moveToNext();
-      }
-      
-      // Make sure to close the cursor
-      cursor.close();
-      database.close();
-      return familyMembers;
-   }
-   
-   private FamilyMember familyMember(Cursor c) {
-      FamilyMember ret = new FamilyMember(-1, -1, null);
-      ret.setId(c.getLong(c.getColumnIndex(FamilyDbHelper.COLUMN_ID)));
-      ret.setContactId(c.getLong(c.getColumnIndex(FamilyDbHelper.COLUMN_CONTACT_ID)));
-      ret.setName(c.getString(c.getColumnIndex(FamilyDbHelper.COLUMN_NAME)));
-      return ret;
-   }
+	public void addFamilyMember(String name, long contactId) {
+		HashMap<String,Object> params = new HashMap<String, Object>();
+		params.put("contactId", contactId);
+		params.put("name", name);
+		execute(R.string.addMember, params);
+	}
 }

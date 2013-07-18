@@ -1,0 +1,21 @@
+<resources>
+
+    <string name="initialize">
+        create table family (
+        	_id integer primary key autoincrement,
+        	contactId integer not null,
+        	name text not null
+        );
+    </string>
+
+    <string name="getMembers">
+        select * from family
+    </string>
+    
+    <string name="addMember">
+        insert into family
+         (contactId, name)
+        values
+         (#contactId#,#name#)
+    </string>
+</resources>
