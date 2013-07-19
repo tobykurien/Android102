@@ -3,6 +3,7 @@ package asia.sonix.android.orm;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,8 +67,8 @@ public class AbatisService extends SQLiteOpenHelper {
     *           呼び出し元Contextオブジェクト
     * 
     */
-   protected AbatisService(Context context) {
-      super(context, DB_FILE_NAME, null, 1);
+   protected AbatisService(Context context, int version) {
+      super(context, DB_FILE_NAME, null, version);
       this.context = context;
    }
 
@@ -80,8 +81,8 @@ public class AbatisService extends SQLiteOpenHelper {
     *           生成するDB file name
     * 
     */
-   protected AbatisService(Context context, String dbName) {
-      super(context, dbName.concat(".db"), null, 1);
+   protected AbatisService(Context context, String dbName, int version) {
+      super(context, dbName.concat(".db"), null, version);
       this.context = context;
    }
 
@@ -94,9 +95,9 @@ public class AbatisService extends SQLiteOpenHelper {
     *           生成するDB file name
     * 
     */
-   public static AbatisService getInstance(Context context) {
+   public static AbatisService getInstance(Context context, int version) {
       if (instance == null) {
-         instance = new AbatisService(context);
+         instance = new AbatisService(context, version);
       }
       return instance;
    }
@@ -110,9 +111,9 @@ public class AbatisService extends SQLiteOpenHelper {
     *           生成するDB file name
     * 
     */
-   public static AbatisService getInstance(Context context, String dbName) {
+   public static AbatisService getInstance(Context context, String dbName, int version) {
       if (instance == null) {
-         instance = new AbatisService(context, dbName);
+         instance = new AbatisService(context, dbName, version);
       }
       return instance;
    }
@@ -173,7 +174,7 @@ public class AbatisService extends SQLiteOpenHelper {
          while (mapIterator.hasNext()) {
             String key = mapIterator.next();
             Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+            sql = sql.replaceAll("#" + key + "#", toSqlString(value));
          }
       }
       if (sql.indexOf('#') != -1) {
@@ -221,7 +222,7 @@ public class AbatisService extends SQLiteOpenHelper {
          while (mapIterator.hasNext()) {
             String key = mapIterator.next();
             Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+            sql = sql.replaceAll("#" + key + "#", toSqlString(value));
          }
       }
       if (sql.indexOf('#') != -1) {
@@ -271,7 +272,7 @@ public class AbatisService extends SQLiteOpenHelper {
          while (mapIterator.hasNext()) {
             String key = mapIterator.next();
             Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+            sql = sql.replaceAll("#" + key + "#", toSqlString(value));
          }
       }
       if (sql.indexOf('#') != -1) {
@@ -336,7 +337,7 @@ public class AbatisService extends SQLiteOpenHelper {
          while (mapIterator.hasNext()) {
             String key = mapIterator.next();
             Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+            sql = sql.replaceAll("#" + key + "#", toSqlString(value));
          }
       }
       if (sql.indexOf('#') != -1) {
@@ -398,7 +399,7 @@ public class AbatisService extends SQLiteOpenHelper {
          while (mapIterator.hasNext()) {
             String key = mapIterator.next();
             Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+            sql = sql.replaceAll("#" + key + "#", toSqlString(value));
          }
       }
       if (sql.indexOf('#') != -1) {
@@ -603,5 +604,25 @@ public class AbatisService extends SQLiteOpenHelper {
       }
       m.appendTail(sb);
       return sb.toString();
+   }
+   
+   /**
+    * Convert value object to sanitized SQL string
+    * @param value - the value object
+    * @return a string for use in an SQL statement
+    */
+   public String toSqlString(Object value) {
+	   String val = String.valueOf(value);
+	   // @TODO - sanitize val here to prevent SQL Injection attacks
+	   // or re-write this class to use parameterized SQL
+	   
+	   if (value instanceof Integer ||
+			   value instanceof Float ||
+			   value instanceof Double ||
+			   value instanceof Long ) {
+		   return val;
+	   } else {
+		   return "'" + val + "'";
+	   }
    }
 }

@@ -11,11 +11,4 @@
     <string name="getMembers">
         select * from family
     </string>
-    
-    <string name="addMember">
-        insert into family
-         (contactId, name)
-        values
-         (#contactId#,#name#)
-    </string>
 </resources>

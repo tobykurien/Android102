@@ -1,19 +1,17 @@
 package com.myfamily.db;
 
-import java.util.HashMap;
 import java.util.List;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import asia.sonix.android.orm.AbatisService;
 
 import com.myfamily.R;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.database.sqlite.SQLiteOpenHelper;
-import asia.sonix.android.orm.AbatisService;
-
 public class FamilyDb extends AbatisService {
 	public FamilyDb(Context context) {
-		super(context, "family");
+		super(context, "family", 1);
 	}
 
 	@Override
@@ -25,10 +23,13 @@ public class FamilyDb extends AbatisService {
 		return executeForBeanList(R.string.getMembers, null, FamilyMember.class);
 	}
 
-	public void addFamilyMember(String name, long contactId) {
-		HashMap<String,Object> params = new HashMap<String, Object>();
-		params.put("contactId", contactId);
-		params.put("name", name);
-		execute(R.string.addMember, params);
+	public long addFamilyMember(String name, long contactId) {
+		ContentValues cv = new ContentValues();
+		cv.put("contactId", contactId);
+		cv.put("name", name);
+		SQLiteDatabase database = getWritableDatabase();
+		long ret = database.insert("family", "", cv);
+		database.close();
+		return ret;
 	}
 }
