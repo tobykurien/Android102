@@ -66,8 +66,8 @@ public class AbatisService extends SQLiteOpenHelper {
     *           呼び出し元Contextオブジェクト
     * 
     */
-   protected AbatisService(Context context) {
-      super(context, DB_FILE_NAME, null, 1);
+   protected AbatisService(Context context, int version) {
+      super(context, DB_FILE_NAME, null, version);
       this.context = context;
    }
 
@@ -80,8 +80,8 @@ public class AbatisService extends SQLiteOpenHelper {
     *           生成するDB file name
     * 
     */
-   protected AbatisService(Context context, String dbName) {
-      super(context, dbName.concat(".db"), null, 1);
+   protected AbatisService(Context context, String dbName, int version) {
+      super(context, dbName.concat(".db"), null, version);
       this.context = context;
    }
 
@@ -94,9 +94,9 @@ public class AbatisService extends SQLiteOpenHelper {
     *           生成するDB file name
     * 
     */
-   protected static AbatisService getInstance(Context context) {
+   protected static AbatisService getInstance(Context context, int version) {
       if (instance == null) {
-         instance = new AbatisService(context);
+         instance = new AbatisService(context, version);
       }
       return instance;
    }
@@ -110,9 +110,9 @@ public class AbatisService extends SQLiteOpenHelper {
     *           生成するDB file name
     * 
     */
-   protected static AbatisService getInstance(Context context, String dbName) {
+   protected static AbatisService getInstance(Context context, String dbName, int version) {
       if (instance == null) {
-         instance = new AbatisService(context, dbName);
+         instance = new AbatisService(context, dbName, version);
       }
       return instance;
    }
@@ -169,36 +169,39 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    public Map<String, Object> executeForMap(int sqlId, Map<String, ? extends Object> bindParams) {
       getDbObject();
-      String sql = context.getResources().getString(sqlId);
-      if (bindParams != null) {
-         Iterator<String> mapIterator = bindParams.keySet().iterator();
-         while (mapIterator.hasNext()) {
-            String key = mapIterator.next();
-            Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+      try {
+         String sql = context.getResources().getString(sqlId);
+         if (bindParams != null) {
+            Iterator<String> mapIterator = bindParams.keySet().iterator();
+            while (mapIterator.hasNext()) {
+               String key = mapIterator.next();
+               Object value = bindParams.get(key);
+               sql = sql.replaceAll("#" + key + "#", "'" + String.valueOf(value) + "'");
+            }
          }
-      }
-      if (sql.indexOf('#') != -1) {
-         Log.e(TAG, "undefined parameter in sql: " + sql);
-         return null;
-      }
-      Cursor cursor = dbObj.rawQuery(sql, null);
-      List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-      if (cursor == null) { return null; }
-      String[] columnNames = cursor.getColumnNames();
-      while (cursor.moveToNext()) {
-         Map<String, Object> map = new HashMap<String, Object>();
-         int i = 0;
-         for (String columnName : columnNames) {
-            map.put(columnName, cursor.getString(i));
-            i++;
+         if (sql.indexOf('#') != -1) {
+            Log.e(TAG, "undefined parameter in sql: " + sql);
+            return null;
          }
-         mapList.add(map);
+         Cursor cursor = dbObj.rawQuery(sql, null);
+         List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+         if (cursor == null) { return null; }
+         String[] columnNames = cursor.getColumnNames();
+         while (cursor.moveToNext()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            int i = 0;
+            for (String columnName : columnNames) {
+               map.put(columnName, cursor.getString(i));
+               i++;
+            }
+            mapList.add(map);
+         }
+         if (mapList.size() <= 0) { return null; }
+         cursor.close();
+         return mapList.get(0);
+      } finally {
+         dbObj.close();
       }
-      if (mapList.size() <= 0) { return null; }
-      cursor.close();
-      dbObj.close();
-      return mapList.get(0);
    }
 
    /**
@@ -217,35 +220,38 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    public List<Map<String, Object>> executeForMapList(int sqlId, Map<String, ? extends Object> bindParams) {
       getDbObject();
-      String sql = context.getResources().getString(sqlId);
-      if (bindParams != null) {
-         Iterator<String> mapIterator = bindParams.keySet().iterator();
-         while (mapIterator.hasNext()) {
-            String key = mapIterator.next();
-            Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+      try {
+         String sql = context.getResources().getString(sqlId);
+         if (bindParams != null) {
+            Iterator<String> mapIterator = bindParams.keySet().iterator();
+            while (mapIterator.hasNext()) {
+               String key = mapIterator.next();
+               Object value = bindParams.get(key);
+               sql = sql.replaceAll("#" + key + "#", "'" + String.valueOf(value) + "'");
+            }
          }
-      }
-      if (sql.indexOf('#') != -1) {
-         Log.e(TAG, "undefined parameter in sql: " + sql);
-         return null;
-      }
-      Cursor cursor = dbObj.rawQuery(sql, null);
-      List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-      if (cursor == null) { return null; }
-      String[] columnNames = cursor.getColumnNames();
-      while (cursor.moveToNext()) {
-         Map<String, Object> map = new HashMap<String, Object>();
-         int i = 0;
-         for (String columnName : columnNames) {
-            map.put(columnName, cursor.getString(i));
-            i++;
+         if (sql.indexOf('#') != -1) {
+            Log.e(TAG, "undefined parameter in sql: " + sql);
+            return null;
          }
-         mapList.add(map);
+         Cursor cursor = dbObj.rawQuery(sql, null);
+         List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+         if (cursor == null) { return null; }
+         String[] columnNames = cursor.getColumnNames();
+         while (cursor.moveToNext()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            int i = 0;
+            for (String columnName : columnNames) {
+               map.put(columnName, cursor.getString(i));
+               i++;
+            }
+            mapList.add(map);
+         }
+         cursor.close();
+         return mapList;
+      } finally {
+         dbObj.close();
       }
-      cursor.close();
-      dbObj.close();
-      return mapList;
    }
 
    /**
@@ -267,50 +273,53 @@ public class AbatisService extends SQLiteOpenHelper {
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public <T> T executeForBean(int sqlId, Map<String, ? extends Object> bindParams, Class bean) {
       getDbObject();
-      String sql = context.getResources().getString(sqlId);
-      if (bindParams != null) {
-         Iterator<String> mapIterator = bindParams.keySet().iterator();
-         while (mapIterator.hasNext()) {
-            String key = mapIterator.next();
-            Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+      try {
+         String sql = context.getResources().getString(sqlId);
+         if (bindParams != null) {
+            Iterator<String> mapIterator = bindParams.keySet().iterator();
+            while (mapIterator.hasNext()) {
+               String key = mapIterator.next();
+               Object value = bindParams.get(key);
+               sql = sql.replaceAll("#" + key + "#", "'" + String.valueOf(value) + "'");
+            }
          }
-      }
-      if (sql.indexOf('#') != -1) {
-         Log.e(TAG, "undefined parameter in sql: " + sql);
-         return null;
-      }
-      Cursor cursor = dbObj.rawQuery(sql, null);
-      List<T> objectList = new ArrayList<T>();
-      if (cursor == null) { return null; }
-      String[] columnNames = cursor.getColumnNames();
-      List<String> dataNames = new ArrayList<String>();
-      for (String columnName : columnNames) {
-         dataNames.add(chgDataName(columnName));
-      }
-      T beanObj = null;
-      // get bean class package
-      Package beanPackage = bean.getPackage();
-      while (cursor.moveToNext()) {
-         Map<String, Object> map = new HashMap<String, Object>();
-         int i = 0;
-         for (String dataName : dataNames) {
-            map.put(dataName, cursor.getString(i));
-            i++;
-         }
-         JSONObject json = new JSONObject(map);
-         try {
-            beanObj = (T) parse(json.toString(), bean, beanPackage.getName());
-         } catch (Exception e) {
-            Log.d(TAG, e.toString());
+         if (sql.indexOf('#') != -1) {
+            Log.e(TAG, "undefined parameter in sql: " + sql);
             return null;
          }
-         objectList.add(beanObj);
+         Cursor cursor = dbObj.rawQuery(sql, null);
+         List<T> objectList = new ArrayList<T>();
+         if (cursor == null) { return null; }
+         String[] columnNames = cursor.getColumnNames();
+         List<String> dataNames = new ArrayList<String>();
+         for (String columnName : columnNames) {
+            dataNames.add(chgDataName(columnName));
+         }
+         T beanObj = null;
+         // get bean class package
+         Package beanPackage = bean.getPackage();
+         while (cursor.moveToNext()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            int i = 0;
+            for (String dataName : dataNames) {
+               map.put(dataName, cursor.getString(i));
+               i++;
+            }
+            JSONObject json = new JSONObject(map);
+            try {
+               beanObj = (T) parse(json.toString(), bean, beanPackage.getName());
+            } catch (Exception e) {
+               Log.d(TAG, e.toString());
+               return null;
+            }
+            objectList.add(beanObj);
+         }
+         if (objectList.size() <= 0) { return null; }
+         cursor.close();
+         return objectList.get(0);
+      } finally {
+         dbObj.close();
       }
-      if (objectList.size() <= 0) { return null; }
-      cursor.close();
-      dbObj.close();
-      return objectList.get(0);
    }
 
    /**
@@ -332,49 +341,52 @@ public class AbatisService extends SQLiteOpenHelper {
    @SuppressWarnings({ "unchecked", "rawtypes" })
    public <T> List<T> executeForBeanList(int sqlId, Map<String, ? extends Object> bindParams, Class bean) {
       getDbObject();
-      String sql = context.getResources().getString(sqlId);
-      if (bindParams != null) {
-         Iterator<String> mapIterator = bindParams.keySet().iterator();
-         while (mapIterator.hasNext()) {
-            String key = mapIterator.next();
-            Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
+      try {
+         String sql = context.getResources().getString(sqlId);
+         if (bindParams != null) {
+            Iterator<String> mapIterator = bindParams.keySet().iterator();
+            while (mapIterator.hasNext()) {
+               String key = mapIterator.next();
+               Object value = bindParams.get(key);
+               sql = sql.replaceAll("#" + key + "#", "'" + String.valueOf(value) + "'");
+            }
          }
-      }
-      if (sql.indexOf('#') != -1) {
-         Log.e(TAG, "undefined parameter in sql: " + sql);
-         return null;
-      }
-      Cursor cursor = dbObj.rawQuery(sql, null);
-      List<T> objectList = new ArrayList<T>();
-      if (cursor == null) { return null; }
-      String[] columnNames = cursor.getColumnNames();
-      List<String> dataNames = new ArrayList<String>();
-      for (String columnName : columnNames) {
-         dataNames.add(chgDataName(columnName));
-      }
-      T beanObj = null;
-      // get bean class package
-      Package beanPackage = bean.getPackage();
-      while (cursor.moveToNext()) {
-         Map<String, Object> map = new HashMap<String, Object>();
-         int i = 0;
-         for (String dataName : dataNames) {
-            map.put(dataName, cursor.getString(i));
-            i++;
-         }
-         JSONObject json = new JSONObject(map);
-         try {
-            beanObj = (T) parse(json.toString(), bean, beanPackage.getName());
-         } catch (Exception e) {
-            Log.d(TAG, e.toString());
+         if (sql.indexOf('#') != -1) {
+            Log.e(TAG, "undefined parameter in sql: " + sql);
             return null;
          }
-         objectList.add(beanObj);
+         Cursor cursor = dbObj.rawQuery(sql, null);
+         List<T> objectList = new ArrayList<T>();
+         if (cursor == null) { return null; }
+         String[] columnNames = cursor.getColumnNames();
+         List<String> dataNames = new ArrayList<String>();
+         for (String columnName : columnNames) {
+            dataNames.add(chgDataName(columnName));
+         }
+         T beanObj = null;
+         // get bean class package
+         Package beanPackage = bean.getPackage();
+         while (cursor.moveToNext()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            int i = 0;
+            for (String dataName : dataNames) {
+               map.put(dataName, cursor.getString(i));
+               i++;
+            }
+            JSONObject json = new JSONObject(map);
+            try {
+               beanObj = (T) parse(json.toString(), bean, beanPackage.getName());
+            } catch (Exception e) {
+               Log.d(TAG, e.toString());
+               return null;
+            }
+            objectList.add(beanObj);
+         }
+         cursor.close();
+         return objectList;
+      } finally {
+         dbObj.close();
       }
-      cursor.close();
-      dbObj.close();
-      return objectList;
    }
 
    /**
@@ -393,28 +405,31 @@ public class AbatisService extends SQLiteOpenHelper {
     */
    public int execute(int sqlId, Map<String, ? extends Object> bindParams) {
       getDbObject();
-      int row = 0;
-      String sql = context.getResources().getString(sqlId);
-      if (bindParams != null) {
-         Iterator<String> mapIterator = bindParams.keySet().iterator();
-         while (mapIterator.hasNext()) {
-            String key = mapIterator.next();
-            Object value = bindParams.get(key);
-            sql = sql.replaceAll("#" + key + "#", "'" + value.toString() + "'");
-         }
-      }
-      if (sql.indexOf('#') != -1) {
-         Log.e(TAG, "undefined parameter in sql: " + sql);
-         return row;
-      }
       try {
-         dbObj.execSQL(sql);
-         dbObj.close();
-         row += 1;
-      } catch (SQLException e) {
+         int row = 0;
+         String sql = context.getResources().getString(sqlId);
+         if (bindParams != null) {
+            Iterator<String> mapIterator = bindParams.keySet().iterator();
+            while (mapIterator.hasNext()) {
+               String key = mapIterator.next();
+               Object value = bindParams.get(key);
+               sql = sql.replaceAll("#" + key + "#", "'" + String.valueOf(value) + "'");
+            }
+         }
+         if (sql.indexOf('#') != -1) {
+            Log.e(TAG, "undefined parameter in sql: " + sql);
+            return row;
+         }
+         try {
+            dbObj.execSQL(sql);
+            row += 1;
+         } catch (SQLException e) {
+            return row;
+         }
          return row;
+      } finally {
+         dbObj.close();
       }
-      return row;
    }
 
    /**
@@ -488,6 +503,16 @@ public class AbatisService extends SQLiteOpenHelper {
                m.setAccessible(true);
                // Set value
                m.invoke(obj, jsonObj.getLong(fieldName));
+            } catch (Exception ex) {
+               Log.d(TAG, ex.getMessage());
+            }
+         } else if (typeName.equals("boolean") || typeName.equals("java.lang.Boolean")) {
+            Class[] parms = { type };
+            try {
+               Method m = beanClass.getDeclaredMethod(getBeanMethodName(fieldName, 1), parms);
+               m.setAccessible(true);
+               // Set value
+               m.invoke(obj, jsonObj.getBoolean(fieldName));
             } catch (Exception ex) {
                Log.d(TAG, ex.getMessage());
             }
